@@ -15,8 +15,7 @@
     cursor_bg_color = "#aaaaaa"
     foreground_color = "#c0bfbc"
     palette = "#073642:#db4437:#f4b400:#99c1f1:#4285f4:#f4b400:#0f9d58:#eee8d5:#f6d32d:#cb4b16:#586e75:#657b83:#839496:#6c71c4:#93a1a1:#fdf6e3"
-    title_transmit_fg_color = "#000000"
-    title_transmit_bg_color = "#f9f06b"
+    title_transmit_bg_color = "#4285f4"
   [[default 2]]
     background_color = "#1e1f22"
     cursor_fg_color = "#241f31"
