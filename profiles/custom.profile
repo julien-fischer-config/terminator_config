@@ -15,7 +15,7 @@
     foreground_color = "#c0bfbc"
     palette = "#073642:#dc322f:#ffbe6f:#5b9062:#268bd2:#bba35d:#2aa198:#eee8d5:#f6d32d:#cb4b16:#586e75:#657b83:#839496:#6c71c4:#93a1a1:#fdf6e3"
     title_transmit_fg_color = "#000000"
-    title_transmit_bg_color = "#f9f06b"
+    title_transmit_bg_color = "#ffbe6f"
   [[default 2]]
     background_color = "#1e1f22"
     cursor_fg_color = "#241f31"
@@ -55,7 +55,7 @@
       order = 0
       profile = default
       uuid = f427c970-e679-47f4-9017-f78e1484cbc9
-      command = cd ~/programming && ls -AF --color=auto --group-directories-first; bash
+      command = cd / && ls -AF --color=auto --group-directories-first; bash
     [[[terminal4]]]
       type = Terminal
       parent = child2
@@ -82,5 +82,5 @@
       order = 1
       profile = default
       uuid = 8bff67eb-a3f6-4a2e-81ca-74a07652033b
-      command = ls -AF --color=auto --group-directories-first; bash
+      command = cd ~/programming && ls -AF --color=auto --group-directories-first; bash
 [plugins]
