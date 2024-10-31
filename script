@@ -1,0 +1,39 @@
+    if [[ ! -f "${TERMINATOR_CONFIG_FILE}" ]]; then
+        echo "Configuration file not found at ${TERMINATOR_CONFIG_FILE}"
+        return 1
+    fi
+    local reading_layouts=1
+    local layouts=()
+    while IFS= read -r line; do
+        echo "${line}"
+        if is_comment "${line}"; then
+            continue;
+        fi
+        if [[ "${line}" == *"[layouts]"* ]]; then
+            reading_layouts=0
+            echo -e "$(color '--------------------- ENTER layouts --------------------------')"
+            continue
+        fi
+        if [[ $reading_layouts -eq 0 && "${line}" =~ ^\[[^\]]+\]$ && "${line}" != "[layouts]" ]]; then
+            reading_layouts=1
+            echo -e "$(color '--------------------- EXIT layouts --------------------------')"
+            continue
+        fi
+    if [[ $reading_layouts -eq 0 && "${line}" =~ ^[[:space:]]*\[\[([^]]+)\]\][[:space:]]*$ ]]; then
+        echo -e "$(color '--------------------- ADD layout --------------------------')"
+        layouts+=("${BASH_REMATCH[1]}")
+    fi
+    done < "${TERMINATOR_CONFIG_FILE}"
+    
+    echo "${#layouts[@]} available layouts:"
+    local current_layout=
+    if [[ -f "${CURRENT_LAYOUT_FILE}" ]]; then
+        current_layout=$(cat "${CURRENT_LAYOUT_FILE}")
+    fi
+    for layout in "${layouts[@]}"; do
+        if [[ -n "${current_layout}" && "${layout}" == "${current_layout}" ]]; then
+            echo -e "> $(color "${layout}")"
+        else
+            echo "- ${layout}"
+        fi
+    done
