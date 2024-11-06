@@ -1,54 +1,56 @@
-set_layout() {
-    local layout_name="${1}"
-    local styles=$(print_layout "${layout_name}")
-    if [[ -z "${styles}" ]]; then
-        echo "${layout_name} layout not found."
-        return 1
-    fi
-
-    local temp_file=$(mktemp)
-    local reading_target_layout=false
-    local reading_layouts=false
-
-    while IFS= read -r line; do
-        if is_comment "${line}"; then
-            continue;
-        fi
-        if [[ "${line}" == "[layouts]" ]]; then
-    echo -e "$(color "------------------------- ENTER layouts-------------------------" "${YELLOW}")"
-            reading_layouts=true
-        elif [[ $reading_layouts == true && "${line}" =~ ^\[[^]]*\]$ && "${line}" != "[layouts]" ]]; then
-    echo -e "$(color "------------------------- EXIT layouts-------------------------" "${YELLOW}")"
-            reading_layouts=false
-            reading_target_layout=false
-        fi
-
-        if [[ $reading_layouts == true && "${line}" == "  [[default]]" ]]; then
-    echo -e "$(color "---------------------- ENTER target ----------------------" "${GREEN}")"
-    echo -e "$(color "${line} ${GREEN}")"
-    echo -e "$(color "${styles} ${CYAN}")"
-            reading_target_layout=true
-            echo "${line}" >> "${temp_file}"
-            echo "${styles}" >> "${temp_file}"
-            reading_target_layout=false
-    echo -e "$(color "---------------------- EXIT target ----------------------" "${CYAN}")"
-        elif [[ $reading_target_layout == true && "${line}" =~ ^[[:space:]]*\[\[ ]]; then
-            reading_target_layout=false
-            echo "${line}" >> "${temp_file}"
-    echo -e "$(color "${line}" "${GREEN}")"
-    echo -e "$(color "---------------------- EXIT target ----------------------" "${GREEN}")"
-    echo -e "$(color "${line}" "${GREEN}")"
-        elif [[ $reading_target_layout == true && "${line}" =~ ^[[:space:]]+[a-zA-Z_]+[[:space:]]*= ]]; then
-    echo -e "$(color "CONTINUE")"
-            continue
-        else
-    echo -e "$(color "${line}")"
-            echo "${line}" >> "${temp_file}"
-        fi
-    done < "${TERMINATOR_CONFIG_FILE}"
-
-    backup "${TERMINATOR_CONFIG_FILE}" -q
-    sudo mv "$temp_file" "${TERMINATOR_CONFIG_FILE}"
-    touch "${TERMINATOR_DIR}/current.layout"
-    echo "${layout_name}" > "${CURRENT_THEME_FILE}"
+parse_options() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -[a-zA-Z]*) # Clustered short options
+        for (( i=1; i<${#1}; i++ )); do
+          echo "Option: -${1:i:1}"
+        done
+        ;;
+      --*) # Long options
+        echo "Long option: $1"
+        ;;
+      -*) # Single short option
+        echo "Option: $1"
+        ;;
+      *) # Positional parameters
+        echo "Positional parameter: $1"
+        ;;
+    esac
+    shift
+  done
 }
+# 
+parse_options "$@"
+
+-----------------------------------------
+
+
+decluster() {
+  declare -a args=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -[a-zA-Z]*)
+        for (( i=1; i<${#1}; i++ )); do
+          args+=("-${1:i:1}")
+        done
+        ;;
+      *)
+        args+=("${1}")
+        ;;
+    esac
+    shift
+  done
+  echo "${args[@]}"
+}
+
+decluster -abcd
+decluster param1 param2 -abcd
+decluster -abcd param1 param2 -xyz --long-option
+decluster --long-option -abcd param1 param2 -xyz 
+decluster
+
+
+
+
+
+parse_options $(fg -abcd param1 param2 -xyz --long-option)
