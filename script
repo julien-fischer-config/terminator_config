@@ -1,4 +1,1 @@
-rand_fibonacci() {
-    local -a fibonacci=(1 2 3 5 8 13 21)
-    echo "${fibonacci[$(rand 0 6)]}"
-}
+export PATH
