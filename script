@@ -1,3 +1,27 @@
+get_property() {
+    local file="${1}"
+    local key="${2}"
+    
+    while IFS='=' read -r k v; do
+        k="${k#"${k%%[![:space:]]*}"}"
+        k="${k%"${k##*[![:space:]]}"}"
+        
+        if [[ $k == "$key" ]]; then
+            # Remove leading/trailing whitespace and quotes from the value
+            v="${v#"${v%%[![:space:]]*}"}"
+            v="${v%"${v##*[![:space:]]}"}"
+            v="${v#\"}"
+            v="${v%\"}"
+            echo "$v"
+            return 0
+        fi
+    done < "$file"
+    
+    return 1
+}
+
+
+
 put_property() {  
     local file="${1}"
     local key="${2}"  
