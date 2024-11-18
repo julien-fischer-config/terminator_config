@@ -1,50 +1,29 @@
-get_property() {
-    local file="${1}"
-    local key="${2}"
-    
-    while IFS='=' read -r k v; do
-        k="${k#"${k%%[![:space:]]*}"}"
-        k="${k%"${k##*[![:space:]]}"}"
-        
-        if [[ $k == "$key" ]]; then
-            # Remove leading/trailing whitespace and quotes from the value
-            v="${v#"${v%%[![:space:]]*}"}"
-            v="${v%"${v##*[![:space:]]}"}"
-            v="${v#\"}"
-            v="${v%\"}"
-            echo "$v"
-            return 0
-        fi
-    done < "$file"
-    
-    return 1
+#!/bin/bash
+
+BACKLIGHT_PATH="/sys/class/leds/dell::kbd_backlight/brightness"
+TIMEOUT=900  # 15 minutes in seconds
+
+turn_on_backlight() {
+    echo 2 | sudo tee $BACKLIGHT_PATH > /dev/null
 }
 
+turn_off_backlight() {
+    echo 0 | sudo tee $BACKLIGHT_PATH > /dev/null
+}
 
+last_input=$(date +%s)
 
-put_property() {  
-    local file="${1}"
-    local key="${2}"  
-    local value="${3}" 
-    local temp_file=$(mktemp)
-    local found=false
-    while IFS='=' read -r k v; do
-        k="${k//[[:space:]]/}"
-        v="${v//[[:space:]]/}"
-        if [[ -z "$k" ]]; then
-            continue
-        fi
-        if [[ "$k" == "$key" ]]; then
-            echo "$key=$value" >> "$temp_file"
-            found=true
-        else
-            echo "$k=$v" >> "$temp_file"
-        fi
-    done < "$file"
-    
-    if ! $found; then
-        echo "$key=$value" >> "$temp_file"
+while true; do
+    current_time=$(date +%s)
+    if [ $((current_time - last_input)) -ge $TIMEOUT ]; then
+        turn_off_backlight
+    else
+        turn_on_backlight
     fi
-    
-    mv "$temp_file" "$file"
-}
+
+    if read -t 1 -n 1; then
+        last_input=$current_time
+    fi
+
+    sleep 1
+done
